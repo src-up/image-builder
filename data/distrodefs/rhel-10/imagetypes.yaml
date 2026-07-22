@@ -1048,7 +1048,8 @@ image_types:
       <<: *default_partition_tables
     package_sets:
       os:
-        - include:
+        - &qcow2_pkgset
+          include:
             - "@core"
             - "chrony"
             - "cloud-init"
@@ -1241,43 +1242,9 @@ image_types:
               - "/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
     package_sets:
       os:
+        - *qcow2_pkgset
         - include:
-            - "@core"
-            - "chrony"
-            - "cloud-init"
-            - "cloud-utils-growpart"
             - "firewalld"
-            - "qemu-guest-agent"
-            - "redhat-release"
-            - "rsync"
-            - "system-reinstall-bootc"
-            - "tuned"
-          exclude:
-            - "aic94xx-firmware"
-            - "alsa-firmware"
-            - "alsa-tools-firmware"
-            - "biosdevname"
-            - "dracut-config-rescue"
-            - "iprutils"
-            - "ivtv-firmware"
-            - "iwl1000-firmware"
-            - "iwl100-firmware"
-            - "iwl105-firmware"
-            - "iwl135-firmware"
-            - "iwl2000-firmware"
-            - "iwl2030-firmware"
-            - "iwl3160-firmware"
-            - "iwl3945-firmware"
-            - "iwl4965-firmware"
-            - "iwl5000-firmware"
-            - "iwl5150-firmware"
-            - "iwl6000-firmware"
-            - "iwl6000g2a-firmware"
-            - "iwl6000g2b-firmware"
-            - "iwl6050-firmware"
-            - "iwl7260-firmware"
-            - "libertas-sd8787-firmware"
-            - "plymouth"
     partition_table:
       x86_64:
         type: "gpt"
