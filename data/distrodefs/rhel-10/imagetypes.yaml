@@ -1048,8 +1048,7 @@ image_types:
       <<: *default_partition_tables
     package_sets:
       os:
-        - &qcow2_pkgset
-          include:
+        - include:
             - "@core"
             - "chrony"
             - "cloud-init"
@@ -1240,11 +1239,6 @@ image_types:
           shallow_merge:
             gpgkey_files:
               - "/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
-    package_sets:
-      os:
-        - *qcow2_pkgset
-        - include:
-            - "firewalld"
     partition_table:
       x86_64:
         type: "gpt"
