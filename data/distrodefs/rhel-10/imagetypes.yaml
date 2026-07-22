@@ -1207,7 +1207,6 @@ image_types:
         config:
           PasswordAuthentication: false
       enabled_services:
-        - "firewalld"
         - "sshd"
         - "cloud-init"
         - "cloud-init-local"
