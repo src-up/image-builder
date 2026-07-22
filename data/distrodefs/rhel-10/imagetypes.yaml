@@ -1195,17 +1195,41 @@ image_types:
         - "console=ttyS0,115200n8"
         - "netroot=iscsi"
         - "rd.iscsi.firmware=1"
+      time_synchronization:
+        servers:
+          - hostname: "169.254.169.254"
+            prefer: true
+            iburst: true
+            minpoll: 4
+            maxpoll: 4
+        leapsectz: ""
+      sshd_config:
+        config:
+          PasswordAuthentication: false
+      enabled_services:
+        - "firewalld"
+        - "sshd"
+        - "cloud-init"
+        - "cloud-init-local"
+        - "cloud-config"
+        - "cloud-final"
       cloud_init:
         - filename: "00-rhel-default-user.cfg"
           config:
             system_info:
               default_user:
                 name: "opc"
+        - filename: "10-oracle.cfg"
+          config:
+            datasource_list:
+              - "Oracle"
       dracut_conf:
         - filename: "oci.conf"
           config:
             add_drivers:
               - "mlx5_core"
+              - "virtio_net"
+              - "virtio_blk"
       conditions:
         <<: *qcow2_image_config_conditions
         "oracle linux is hostonly":
@@ -1213,6 +1237,12 @@ image_types:
             distro_name: "ol"
           shallow_merge:
             hostonly: true
+        "rhel needs the rhel release rpm gpg key":
+          when:
+            distro_name: "rhel"
+          shallow_merge:
+            gpgkey_files:
+              - "/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
     partition_table:
       x86_64:
         type: "gpt"
