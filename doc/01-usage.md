@@ -456,6 +456,28 @@ $ image-builder upload image.vhd --to azure --arch x86_64 \
 For service principal authentication, provide `--azure-client-id`,
 `--azure-client-secret`, and `--azure-tenant` with the upload command.
 
+### `--to oci`
+
+Upload an image and create an OCI custom image. Credentials are read from the
+standard OCI configuration, including `~/.oci/config` and `OCI_CONFIG_FILE`.
+
+| Flag | Description |
+|---|---|
+| `--oci-bucket` | Object Storage bucket for the temporary image object (required) |
+| `--oci-bucket-namespace` | Object Storage namespace (required) |
+| `--oci-compartment-id` | Compartment in which to create the custom image (required) |
+| `--oci-image-name` | Name for the custom image (required) |
+| `--oci-object-name` | Name for the temporary object (optional) |
+
+```console
+$ image-builder upload --to oci --arch x86_64 \
+    --oci-bucket my-bucket \
+    --oci-bucket-namespace my-namespace \
+    --oci-compartment-id <compartment-ocid> \
+    --oci-image-name my-image \
+    fedora-43-server-oci-x86_64/fedora-43-server-oci-x86_64.qcow2
+```
+
 ### `--to openstack`
 
 Upload an image to OpenStack. Authentication is handled through the standard OpenStack environment variables (e.g. `OS_AUTH_URL`, `OS_USERNAME`).

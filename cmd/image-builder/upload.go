@@ -20,6 +20,7 @@ import (
 	"github.com/osbuild/image-builder/pkg/cloud/azure"
 	"github.com/osbuild/image-builder/pkg/cloud/ibmcloud"
 	"github.com/osbuild/image-builder/pkg/cloud/libvirt"
+	ociCloud "github.com/osbuild/image-builder/pkg/cloud/oci"
 	"github.com/osbuild/image-builder/pkg/cloud/openstack"
 	"github.com/osbuild/image-builder/pkg/platform"
 	"github.com/osbuild/image-builder/pkg/progress"
@@ -41,6 +42,7 @@ var (
 	libvirtNewUploader   = libvirt.NewUploader
 	openstackNewUploader = openstack.NewUploader
 	ibmNewUploader       = ibmcloud.NewUploader
+	ociNewUploader       = ociCloud.NewUploader
 )
 
 func uploadImageWithProgress(uploader cloud.Uploader, pbar progress.ProgressBar, imagePath string) (*cloud.UploadResult, error) {
@@ -105,6 +107,8 @@ func uploaderFor(cmd *cobra.Command, typeOrCloud string, targetArch string, boot
 		return uploaderForCmdIbmCloud(cmd, targetArch, bootMode)
 	case "azure":
 		return uploaderForCmdAzure(cmd, targetArch, bootMode, imagePath)
+	case "oci":
+		return uploaderForCmdOCI(cmd, targetArch, bootMode)
 	default:
 		return nil, fmt.Errorf("%w: %q", ErrUploadTypeUnsupported, typeOrCloud)
 	}
@@ -307,6 +311,49 @@ func uploaderForCmdAzure(cmd *cobra.Command, targetArchStr string, bootMode *pla
 	}
 
 	return azureNewUploader(clientID, clientSecret, tenant, subscription, resourceGroup, imageName, imagePath, targetArch)
+}
+
+func uploaderForCmdOCI(cmd *cobra.Command, targetArchStr string, bootMode *platform.BootMode) (cloud.Uploader, error) {
+	bucket, err := cmd.Flags().GetString("oci-bucket")
+	if err != nil {
+		return nil, err
+	}
+	namespace, err := cmd.Flags().GetString("oci-bucket-namespace")
+	if err != nil {
+		return nil, err
+	}
+	compartment, err := cmd.Flags().GetString("oci-compartment-id")
+	if err != nil {
+		return nil, err
+	}
+	imageName, err := cmd.Flags().GetString("oci-image-name")
+	if err != nil {
+		return nil, err
+	}
+	objectName, err := cmd.Flags().GetString("oci-object-name")
+	if err != nil {
+		return nil, err
+	}
+
+	var missing []string
+	requiredArgs := []string{"oci-bucket", "oci-bucket-namespace", "oci-compartment-id", "oci-image-name"}
+	for _, argName := range requiredArgs {
+		arg, err := cmd.Flags().GetString(argName)
+		if err != nil {
+			return nil, err
+		}
+		if arg == "" {
+			missing = append(missing, fmt.Sprintf("--%s", argName))
+		}
+	}
+	if len(missing) > 0 {
+		if len(missing) == len(requiredArgs) {
+			return nil, fmt.Errorf("%w: %q", ErrUploadConfigNotProvided, missing)
+		}
+		return nil, fmt.Errorf("%w: %q", ErrMissingUploadConfig, missing)
+	}
+
+	return ociNewUploader(bucket, namespace, compartment, imageName, objectName)
 }
 
 func detectArchFromImagePath(imagePath string) string {

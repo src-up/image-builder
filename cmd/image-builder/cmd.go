@@ -291,6 +291,11 @@ func uploadFlags(cmd *cobra.Command) {
 	flagSet.String("azure-subscription", "", "Azure subscription ID (only for --to=azure)")
 	flagSet.String("azure-resource-group", "", "Azure resource group (only for --to=azure)")
 	flagSet.String("azure-image-name", "", "name for the uploaded image (only for --to=azure)")
+	flagSet.String("oci-bucket", "", "target OCI bucket name (only for --to=oci)")
+	flagSet.String("oci-bucket-namespace", "", "target OCI bucket namespace (only for --to=oci)")
+	flagSet.String("oci-compartment-id", "", "target OCI compartment ID (only for --to=oci)")
+	flagSet.String("oci-image-name", "", "name for the uploaded OCI custom image (only for --to=oci)")
+	flagSet.String("oci-object-name", "", "temporary OCI object name (only for --to=oci)")
 	flagSet.String("arch", "", "upload for the given architecture")
 	flagSet.String("format", "", "output in a specific format (yaml, json)")
 

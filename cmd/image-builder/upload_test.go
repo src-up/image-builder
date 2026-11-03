@@ -215,6 +215,44 @@ func TestUploadCmdlineErrors(t *testing.T) {
 	}
 }
 
+func TestUploadWithOCIMock(t *testing.T) {
+	fakeImageFilePath := filepath.Join(t.TempDir(), "fake-image.qcow2")
+	require.NoError(t, os.WriteFile(fakeImageFilePath, []byte("fake-oci-image"), 0600))
+
+	var bucket, namespace, compartment, imageName, objectName string
+	var uploader fakeAwsUploader
+	restore := main.MockOCINewUploader(func(gotBucket, gotNamespace, gotCompartment, gotImageName, gotObjectName string) (cloud.Uploader, error) {
+		bucket = gotBucket
+		namespace = gotNamespace
+		compartment = gotCompartment
+		imageName = gotImageName
+		objectName = gotObjectName
+		return &uploader, nil
+	})
+	defer restore()
+
+	restore = main.MockOsArgs([]string{
+		"upload",
+		"--to=oci",
+		"--oci-bucket=bucket",
+		"--oci-bucket-namespace=namespace",
+		"--oci-compartment-id=compartment",
+		"--oci-image-name=image-name",
+		"--oci-object-name=object-name",
+		fakeImageFilePath,
+	})
+	defer restore()
+
+	require.NoError(t, main.Run())
+	assert.Equal(t, "bucket", bucket)
+	assert.Equal(t, "namespace", namespace)
+	assert.Equal(t, "compartment", compartment)
+	assert.Equal(t, "image-name", imageName)
+	assert.Equal(t, "object-name", objectName)
+	assert.Equal(t, 1, uploader.uploadAndRegisterCalls)
+	assert.Equal(t, "fake-oci-image", uploader.uploadAndRegisterRead.String())
+}
+
 func TestBuildAndUploadWithAWSMock(t *testing.T) {
 	skipIfNoAMISupport(t)
 	restore := main.MockManifestgenDepsolver(fakeDepsolve)

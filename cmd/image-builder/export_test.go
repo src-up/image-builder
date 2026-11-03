@@ -87,6 +87,14 @@ func MockAwscloudNewUploader(f func(string, string, string, *awscloud.UploaderOp
 	}
 }
 
+func MockOCINewUploader(f func(string, string, string, string, string) (cloud.Uploader, error)) (restore func()) {
+	saved := ociNewUploader
+	ociNewUploader = f
+	return func() {
+		ociNewUploader = saved
+	}
+}
+
 func MockBootcResolveInfo(f func(string, string) (*bootc.Info, error)) (restore func()) {
 	saved := bootcResolveInfo
 	bootcResolveInfo = f
